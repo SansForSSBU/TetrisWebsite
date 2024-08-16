@@ -1,3 +1,6 @@
+<head>
+    <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
+</head>
 <canvas id="gameWindow" width="600" height="900"></canvas>
 <script>
 const BOARD_OFFSET_X = 100;
@@ -44,17 +47,75 @@ function color_to_string(enum_value)
     }
 }
 
+function randint(min, max) {
+    return Math.floor(Math.random() * (max-min)) + min;
+}
+
 class Piece {
-    constructor(pieceType, pieceCoords) {
+    constructor(pieceType) {
         this.color = pieceType;
-        this.origin = pieceCoords;
+        if (pieceType == 1) { // I piece
+            this.origin = [4, 0];
+            this.tiles = [
+                this.origin,
+                [this.origin[0], this.origin[1]+1],
+                [this.origin[0], this.origin[1]+2],
+                [this.origin[0], this.origin[1]+3]
+            ]
+        }
         if (pieceType == 2) { // O piece
+            this.origin = [4, 0];
             this.tiles = [
                 this.origin,
                 [this.origin[0]+1, this.origin[1]],
                 [this.origin[0], this.origin[1]+1],
                 [this.origin[0]+1, this.origin[1]+1]
             ];
+        }
+        if (pieceType == 3) { // T piece
+            this.origin = [4, 0];
+            this.tiles = [
+                this.origin,
+                [this.origin[0]+1, this.origin[1]],
+                [this.origin[0]+2, this.origin[1]],
+                [this.origin[0]+1, this.origin[1]+1]
+            ]
+        }
+        if (pieceType == 4) { // S piece
+            this.origin = [4, 1];
+            this.tiles = [
+                this.origin,
+                [this.origin[0]+1, this.origin[1]],
+                [this.origin[0]+1, this.origin[1]-1],
+                [this.origin[0]+2, this.origin[1]-1]
+            ]
+        }
+        if (pieceType == 5) { // J piece
+            this.origin = [4, 2];
+            this.tiles = [
+                this.origin,
+                [this.origin[0]+1, this.origin[1]],
+                [this.origin[0]+1, this.origin[1]-1],
+                [this.origin[0]+1, this.origin[1]-2]
+            ]
+        }
+        if (pieceType == 6) { // Z piece
+            this.origin = [4, 0];
+            this.tiles = [
+                this.origin,
+                [this.origin[0]+1, this.origin[1]],
+                [this.origin[0]+1, this.origin[1]+1],
+                [this.origin[0]+2, this.origin[1]+1]
+            ]
+        }
+        if (pieceType == 7) { // L piece
+            this.origin = [4, 0];
+            this.tiles = [
+                this.origin,
+                [this.origin[0]+1, this.origin[1]],
+                [this.origin[0]+1, this.origin[1]+1],
+                [this.origin[0]+1, this.origin[1]+2]
+            ]
         }
     };
 
@@ -112,7 +173,11 @@ class Board {
     }
 
     get(x, y) {
-        return this.board_rows[y][x];
+        if (x >= 0 && x < this.xSize && y >= 0 && y < this.ySize)
+        {
+            return this.board_rows[y][x];
+        }
+        return -1; // Out of bounds
     }
 }
 
@@ -150,7 +215,7 @@ function drawPiece(piece) {
 }
 
 function makePiece() {
-    let piece = new Piece(2, [4, 0]);
+    let piece = new Piece(randint(1,8));
     return piece;
 }
 
