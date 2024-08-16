@@ -1,6 +1,7 @@
 <head>
     <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
 </head>
+<header>Score: <span id="score">0</span></header>
 <canvas id="gameWindow" width="600" height="900"></canvas>
 <script>
 const BOARD_OFFSET_X = 100;
@@ -196,26 +197,35 @@ class Piece {
     }
     
     land(board) {
+        let linesCleared = 0;
+
         this.tiles.forEach((tile) => {
             board.set(...tile, this.color);
             
         })
-        this.tiles.forEach((tile) => {
-            board.checkLineClear(tile[1]);
-        })
+        linesCleared = board.checkLineClears();
+        if (linesCleared == 1) {
+            score += 100;
+        }
+        else if (linesCleared == 2) {
+            score += 300;
+        }
+        else if (linesCleared == 3) {
+            score += 500;
+        }
+        else if (linesCleared == 4) {
+            score += 800;
+        }
     }
 
     checkGameOver(board) {
         let retVal = 0;
         this.tiles.forEach((tile) => {
-            console.log(tile[0]);
-            console.log(tile[1]);
             if (board.get(tile[0], tile[1]) != 0)
             {
                 retVal = 1;
             }
         })
-        console.log(retVal);
         return retVal;
     }
 }
@@ -256,19 +266,24 @@ class Board {
         this.board_rows.unshift(this.createEmptyRow());
     }
 
-    checkLineClear(y) {
-        let clear = 1;
-        this.board_rows[y].forEach((tile) => {
-            if (tile == 0)
-            {
-                clear = 0;
-            }
-        })
-        if (clear)
+    checkLineClears() {
+        let rowsCleared = 0;
+        for (let y = 0; y < this.ySize; y++)
         {
-            this.clearLine(y)
+            let clear = 1;
+            this.board_rows[y].forEach((tile) => {
+                if (tile == 0)
+                {
+                    clear = 0;
+                }
+            })
+            if (clear)
+            {
+                this.clearLine(y)
+                rowsCleared += 1;
+            }
         }
-        return clear;
+        return rowsCleared;
     }
 }
 
@@ -305,11 +320,15 @@ function drawPiece(piece) {
     });
 }
 
+function updateScore(score) {
+    var text = document.getElementById("score").textContent = score;
+}
 function makePiece() {
     let piece = new Piece(randint(1,8));
     return piece;
 }
 
+let score = 0;
 let board = new Board(NUM_CELLS_X, NUM_CELLS_Y);
 let ticksToFall = 3;
 let fallTimer = ticksToFall;
@@ -340,10 +359,12 @@ function gameLoop() {
             if (piece.checkGameOver(board) == 1)
             {
                 board = new Board(NUM_CELLS_X, NUM_CELLS_Y);
+                score = 0;
             }
         }
         fallTimer = ticksToFall;
     }
+    updateScore(score);
     drawGameboard(board);
     drawPiece(piece);
 }
