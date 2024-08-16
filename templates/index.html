@@ -45,11 +45,11 @@ function color_to_string(enum_value)
 }
 
 class Piece {
-    constructor(piece_type, piece_coords) {
-        this.color = piece_type;
-        this.origin = piece_coords;
-        if (piece_type == 2) { // Square piece
-            this.occupiedSquares = [
+    constructor(pieceType, pieceCoords) {
+        this.color = pieceType;
+        this.origin = pieceCoords;
+        if (pieceType == 2) { // O piece
+            this.tiles = [
                 this.origin,
                 [this.origin[0]+1, this.origin[1]],
                 [this.origin[0], this.origin[1]+1],
@@ -59,21 +59,21 @@ class Piece {
     };
 
     canFall(board) {
-        let return_value = 1;
-        this.occupiedSquares.forEach((occupiedSquare) => {
-            if ((occupiedSquare[1] + 1 >= board.y_size) || board.board_rows[occupiedSquare[1] + 1][occupiedSquare[0]] != 0)
+        let retVal = 1;
+        this.tiles.forEach((tile) => {
+            if ((tile[1] + 1 >= board.ySize) || board.get(tile[0], tile[1] + 1) != 0)
             {
-                return_value = 0;
+                retVal = 0;
             }
         })
-        return return_value;
+        return retVal;
     }
 
     fall(board) {
         // Check if we can fall
         if (this.canFall(board) == 1)
         {
-            this.occupiedSquares.forEach((occupiedSquare) => {
+            this.tiles.forEach((occupiedSquare) => {
                 occupiedSquare[1] += 1;
             })
             return 0;
@@ -85,21 +85,21 @@ class Piece {
     }
     
     land(board) {
-        this.occupiedSquares.forEach((occupiedSquare) => {
+        this.tiles.forEach((occupiedSquare) => {
             board.board_rows[occupiedSquare[1]][occupiedSquare[0]] = this.color;
         })
     }
 }
 
 class Board {
-    constructor(x_size, y_size) {
-        this.x_size = x_size;
-        this.y_size = y_size;
+    constructor(xSize, ySize) {
+        this.xSize = xSize;
+        this.ySize = ySize;
         this.board_rows = [];
-        for (let i = 0; i < y_size; i++)
+        for (let i = 0; i < ySize; i++)
         {
             let board_row = [];
-            for (let j = 0; j < x_size; j++)
+            for (let j = 0; j < xSize; j++)
             {
                 board_row.push(0);
             }
@@ -107,9 +107,22 @@ class Board {
         }
     }
     
+    set(x, y, color) {
+        this.board_rows[y][x] = color;
+    }
+
+    get(x, y) {
+        return this.board_rows[y][x];
+    }
 }
 
-
+function colorSquare(x, y, color)
+{
+    var c = document.getElementById("gameWindow");
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = color_to_string(color);
+    ctx.fillRect(BOARD_OFFSET_X + x*CELL_SIZE + 1, BOARD_OFFSET_Y + y*CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+}
 
 function drawGameboard(board) {
     var c = document.getElementById("gameWindow");
@@ -118,12 +131,11 @@ function drawGameboard(board) {
     ctx.beginPath();
     ctx.rect(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_WIDTH, BOARD_HEIGHT);
     //filling cells
-    for (let x = 0; x < board.x_size; x++)
+    for (let x = 0; x < board.xSize; x++)
     {
-        for (let y = 0; y < board.y_size; y++)
+        for (let y = 0; y < board.ySize; y++)
         {
-            ctx.fillStyle = color_to_string(board.board_rows[y][x]);
-            ctx.fillRect(BOARD_OFFSET_X + x*CELL_SIZE + 1, BOARD_OFFSET_Y + y*CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+            colorSquare(x, y, board.get(x, y));
         }
     }
     ctx.stroke();
@@ -132,9 +144,8 @@ function drawGameboard(board) {
 function drawPiece(piece) {
     var c = document.getElementById("gameWindow");
     var ctx = c.getContext("2d");
-    piece.occupiedSquares.forEach((occupiedSquare) => {
-        ctx.fillStyle = color_to_string(piece.color);
-        ctx.fillRect(BOARD_OFFSET_X + occupiedSquare[0]*CELL_SIZE + 1, BOARD_OFFSET_Y + occupiedSquare[1]*CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+    piece.tiles.forEach((tile) => {
+        colorSquare(...tile, piece.color)
     });
 }
 
@@ -144,19 +155,19 @@ function makePiece() {
 }
 
 let board = new Board(NUM_CELLS_X, NUM_CELLS_Y);
-let ticks_to_fall = 3;
-let fall_timer = ticks_to_fall;
+let ticksToFall = 3;
+let fallTimer = ticksToFall;
 piece = makePiece();
 
 function gameLoop() {
-    fall_timer--;
-    if (fall_timer == 0) {
+    fallTimer--;
+    if (fallTimer == 0) {
         if (piece.fall(board) == 1)
         {
             piece.land(board);
             piece = makePiece();
         }
-        fall_timer = ticks_to_fall;
+        fallTimer = ticksToFall;
     }
     drawGameboard(board);
     drawPiece(piece);
