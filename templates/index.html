@@ -204,6 +204,20 @@ class Piece {
             board.checkLineClear(tile[1]);
         })
     }
+
+    checkGameOver(board) {
+        let retVal = 0;
+        this.tiles.forEach((tile) => {
+            console.log(tile[0]);
+            console.log(tile[1]);
+            if (board.get(tile[0], tile[1]) != 0)
+            {
+                retVal = 1;
+            }
+        })
+        console.log(retVal);
+        return retVal;
+    }
 }
 
 class Board {
@@ -323,6 +337,10 @@ function gameLoop() {
         {
             piece.land(board);
             piece = makePiece();
+            if (piece.checkGameOver(board) == 1)
+            {
+                board = new Board(NUM_CELLS_X, NUM_CELLS_Y);
+            }
         }
         fallTimer = ticksToFall;
     }
