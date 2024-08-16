@@ -1,31 +1,91 @@
-<h1>Hello, world!</h1>
 <canvas id="gameWindow" width="600" height="900"></canvas>
 <script>
-const BOARD_WIDTH = 400
-const BOARD_HEIGHT = 750
 const BOARD_OFFSET_X = 100
 const BOARD_OFFSET_Y = 100
 const FRAME_DELTA = 100 //ms
-const CELL_SIZE = 30
+const CELL_SIZE = 40
+const NUM_CELLS_X = 10
+const NUM_CELLS_Y = 20
+const BOARD_WIDTH = CELL_SIZE*NUM_CELLS_X
+const BOARD_HEIGHT = CELL_SIZE*NUM_CELLS_Y
 var squarePos = 100
 
-
-
-function gameLoop() {
-    drawGameboard();
-    squarePos += 10;
+const COLOR_ENUM = {
+    WHITE: 0,
+    CYAN: 1,
+    YELLOW: 2,
+    PURPLE: 3,
+    GREEN: 4,
+    BLUE: 5,
+    RED: 6,
+    ORANGE: 7
+};
+function color_to_string(enum_value)
+{
+    switch (enum_value) {
+        case COLOR_ENUM.WHITE:
+            return "white";
+        case COLOR_ENUM.CYAN:
+            return "cyan";
+        case COLOR_ENUM.YELLOW:
+            return "yellow";
+        case COLOR_ENUM.PURPLE:
+            return "purple";
+        case COLOR_ENUM.GREEN:
+            return "green";
+        case COLOR_ENUM.BLUE:
+            return "blue";
+        case COLOR_ENUM.RED:
+            return "red";
+        case COLOR_ENUM.ORANGE:
+            return "orange";
+        default:
+            throw new Error("Encountered an invalid color");
+    }
 }
 
-function drawGameboard() {
+class Board {
+    constructor(x_size, y_size) {
+        this.x_size = x_size;
+        this.y_size = y_size;
+        this.board_rows = [];
+        for (let i = 0; i < y_size; i++)
+        {
+            let board_row = [];
+            for (let j = 0; j < x_size; j++)
+            {
+                board_row.push(0);
+            }
+            this.board_rows.push(board_row);
+        }
+        this.board_rows[3][7] = 7;
+    }
+}
+
+function gameLoop() {
+    drawGameboard(b);
+}
+
+function drawGameboard(board) {
     var c = document.getElementById("gameWindow");
     var ctx = c.getContext("2d");
     ctx.clearRect(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_WIDTH, BOARD_HEIGHT);
     ctx.beginPath();
     ctx.rect(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_WIDTH, BOARD_HEIGHT);
-    ctx.rect(BOARD_OFFSET_X + BOARD_WIDTH/2, squarePos, CELL_SIZE, CELL_SIZE)
+    //filling cells
+    for (let x = 0; x < board.x_size; x++)
+    {
+        for (let y = 0; y < board.y_size; y++)
+        {
+            ctx.fillStyle = color_to_string(board.board_rows[y][x]);
+            ctx.fillRect(BOARD_OFFSET_X + x*CELL_SIZE + 1, BOARD_OFFSET_Y + y*CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+        }
+    }
     ctx.stroke();
 }
 
+let b = new Board(NUM_CELLS_X, NUM_CELLS_Y);
+console.log("Hello, world!");
 setInterval(gameLoop, FRAME_DELTA);
 
 </script>
