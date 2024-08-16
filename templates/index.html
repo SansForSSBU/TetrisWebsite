@@ -1,1 +1,31 @@
 <h1>Hello, world!</h1>
+<canvas id="gameWindow" width="600" height="900"></canvas>
+<script>
+const BOARD_WIDTH = 400
+const BOARD_HEIGHT = 750
+const BOARD_OFFSET_X = 100
+const BOARD_OFFSET_Y = 100
+const FRAME_DELTA = 100 //ms
+const CELL_SIZE = 30
+var squarePos = 100
+
+
+
+function gameLoop() {
+    drawGameboard();
+    squarePos += 10;
+}
+
+function drawGameboard() {
+    var c = document.getElementById("gameWindow");
+    var ctx = c.getContext("2d");
+    ctx.clearRect(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_WIDTH, BOARD_HEIGHT);
+    ctx.beginPath();
+    ctx.rect(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_WIDTH, BOARD_HEIGHT);
+    ctx.rect(BOARD_OFFSET_X + BOARD_WIDTH/2, squarePos, CELL_SIZE, CELL_SIZE)
+    ctx.stroke();
+}
+
+setInterval(gameLoop, FRAME_DELTA);
+
+</script>
