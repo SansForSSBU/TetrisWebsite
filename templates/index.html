@@ -1,17 +1,16 @@
 <canvas id="gameWindow" width="600" height="900"></canvas>
 <script>
-const BOARD_OFFSET_X = 100
-const BOARD_OFFSET_Y = 100
-const FRAME_DELTA = 100 //ms
-const CELL_SIZE = 40
-const NUM_CELLS_X = 10
-const NUM_CELLS_Y = 20
-const BOARD_WIDTH = CELL_SIZE*NUM_CELLS_X
-const BOARD_HEIGHT = CELL_SIZE*NUM_CELLS_Y
-var squarePos = 100
+const BOARD_OFFSET_X = 100;
+const BOARD_OFFSET_Y = 100;
+const FRAME_DELTA = 100; //ms
+const CELL_SIZE = 40;
+const NUM_CELLS_X = 10;
+const NUM_CELLS_Y = 20;
+const BOARD_WIDTH = CELL_SIZE*NUM_CELLS_X;
+const BOARD_HEIGHT = CELL_SIZE*NUM_CELLS_Y;
 
 const COLOR_ENUM = {
-    WHITE: 0,
+    BLACK: 0,
     CYAN: 1,
     YELLOW: 2,
     PURPLE: 3,
@@ -20,11 +19,12 @@ const COLOR_ENUM = {
     RED: 6,
     ORANGE: 7
 };
+
 function color_to_string(enum_value)
 {
     switch (enum_value) {
-        case COLOR_ENUM.WHITE:
-            return "white";
+        case COLOR_ENUM.BLACK:
+            return "black";
         case COLOR_ENUM.CYAN:
             return "cyan";
         case COLOR_ENUM.YELLOW:
@@ -44,6 +44,53 @@ function color_to_string(enum_value)
     }
 }
 
+class Piece {
+    constructor(piece_type, piece_coords) {
+        this.color = piece_type;
+        this.origin = piece_coords;
+        if (piece_type == 2) { // Square piece
+            this.occupiedSquares = [
+                this.origin,
+                [this.origin[0]+1, this.origin[1]],
+                [this.origin[0], this.origin[1]+1],
+                [this.origin[0]+1, this.origin[1]+1]
+            ];
+        }
+    };
+
+    canFall(board) {
+        let return_value = 1;
+        this.occupiedSquares.forEach((occupiedSquare) => {
+            if ((occupiedSquare[1] + 1 >= board.y_size) || board.board_rows[occupiedSquare[1] + 1][occupiedSquare[0]] != 0)
+            {
+                return_value = 0;
+            }
+        })
+        return return_value;
+    }
+
+    fall(board) {
+        // Check if we can fall
+        if (this.canFall(board) == 1)
+        {
+            this.occupiedSquares.forEach((occupiedSquare) => {
+                occupiedSquare[1] += 1;
+            })
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    
+    land(board) {
+        this.occupiedSquares.forEach((occupiedSquare) => {
+            board.board_rows[occupiedSquare[1]][occupiedSquare[0]] = this.color;
+        })
+    }
+}
+
 class Board {
     constructor(x_size, y_size) {
         this.x_size = x_size;
@@ -58,13 +105,11 @@ class Board {
             }
             this.board_rows.push(board_row);
         }
-        this.board_rows[3][7] = 7;
     }
+    
 }
 
-function gameLoop() {
-    drawGameboard(b);
-}
+
 
 function drawGameboard(board) {
     var c = document.getElementById("gameWindow");
@@ -84,8 +129,39 @@ function drawGameboard(board) {
     ctx.stroke();
 }
 
-let b = new Board(NUM_CELLS_X, NUM_CELLS_Y);
-console.log("Hello, world!");
+function drawPiece(piece) {
+    var c = document.getElementById("gameWindow");
+    var ctx = c.getContext("2d");
+    piece.occupiedSquares.forEach((occupiedSquare) => {
+        ctx.fillStyle = color_to_string(piece.color);
+        ctx.fillRect(BOARD_OFFSET_X + occupiedSquare[0]*CELL_SIZE + 1, BOARD_OFFSET_Y + occupiedSquare[1]*CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+    });
+}
+
+function makePiece() {
+    let piece = new Piece(2, [4, 0]);
+    return piece;
+}
+
+let board = new Board(NUM_CELLS_X, NUM_CELLS_Y);
+let ticks_to_fall = 3;
+let fall_timer = ticks_to_fall;
+piece = makePiece();
+
+function gameLoop() {
+    fall_timer--;
+    if (fall_timer == 0) {
+        if (piece.fall(board) == 1)
+        {
+            piece.land(board);
+            piece = makePiece();
+        }
+        fall_timer = ticks_to_fall;
+    }
+    drawGameboard(board);
+    drawPiece(piece);
+}
+
 setInterval(gameLoop, FRAME_DELTA);
 
 </script>
