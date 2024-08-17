@@ -1,9 +1,3 @@
-<head>
-    <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
-</head>
-<header>Score: <span id="score">0</span></header>
-<canvas id="gameWindow" width="600" height="900"></canvas>
-<script>
 const BOARD_OFFSET_X = 100;
 const BOARD_OFFSET_Y = 100;
 const FRAME_DELTA = 100; //ms
@@ -301,6 +295,8 @@ function drawGameboard(board) {
     ctx.clearRect(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_WIDTH, BOARD_HEIGHT);
     ctx.beginPath();
     ctx.rect(BOARD_OFFSET_X, BOARD_OFFSET_Y, BOARD_WIDTH, BOARD_HEIGHT);
+    ctx.fillStyle = 'white';
+    ctx.fill();
     //filling cells
     for (let x = 0; x < board.xSize; x++)
     {
@@ -382,4 +378,3 @@ document.addEventListener("keydown", function(event) {
         right_press = 1;
     }
 })
-</script>
